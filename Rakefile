@@ -8,7 +8,7 @@ begin
     gem.summary = %Q{A Ruby gem for accessing sc2ranks.com}
     gem.description = %Q{A Ruby gem for accessing sc2ranks.com supporting fetching SC2 Base characters, team info, and mass base character fetch. This gem is a development fork of https://github.com/Soleone/sc2ranks}
     gem.email = "coderjoe@coderjoe.net"
-    gem.homepage = "http://github.com/coderjoe/sc2ranks/branches/coderjoe-sc2ranks.gem"
+    gem.homepage = "https://github.com/coderjoe/sc2ranks/tree/coderjoe-sc2ranks.gem"
     gem.authors = ["Dennis Theisen","Joe Bauser"]
     gem.add_dependency "httparty", ">= 0.6.1"
     gem.add_development_dependency "shoulda", ">= 2.11.3"
