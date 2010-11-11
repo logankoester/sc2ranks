@@ -11,7 +11,7 @@ begin
     gem.homepage = "https://github.com/coderjoe/sc2ranks/tree/coderjoe-sc2ranks.gem"
     gem.authors = ["Dennis Theisen","Joe Bauser"]
     gem.add_dependency "httparty", ">= 0.6.1"
-    gem.add_development_dependency "shoulda", ">= 2.11.3"
+    gem.add_development_dependency "contest", ">= 0.1.2"
     gem.add_development_dependency "vcr", ">= 1.2.0"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
