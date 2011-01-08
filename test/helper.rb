@@ -5,7 +5,7 @@ require 'vcr'
 
 VCR.config do |c|
   c.cassette_library_dir = 'fixtures/vcr_cassettes'
-  c.http_stubbing_library = :fakeweb
+  c.stub_with :fakeweb
 end
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))

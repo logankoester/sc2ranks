@@ -62,7 +62,7 @@ module SC2Ranks
       # characters[][region]=us&characters[][name]=coderjoe&characters[][bnet_id]=12345
       # causes sc2ranks.com to error 500. We should follow their docs and add array indexes.
       #post_req = { :query => { :characters => character_array } }
-      post_req = { :query => character_array_to_str_hash(character_array) }
+      post_req = { :body => character_array_to_str_hash(character_array) }
 
       response = post_request(url, post_req )
 
@@ -76,6 +76,19 @@ module SC2Ranks
       url = "/search/#{type.to_s}/#{region}/#{name}.json"
       url += "/#{offset}" if offset
 
+      result = get_request(url)
+
+      Characters.new(result.parsed_response)
+    end
+
+    def profile_search( name, region = REGIONS.first, options )
+      type = options.delete(type) || '1t'
+
+      opt_arr = options.to_a.flatten
+      subtype = opt_arr[0].to_s
+      value = opt_arr[1].to_s
+
+      url = "/psearch/#{region.to_s}/#{URI.encode(name)}/#{URI.encode(type)}/#{URI.encode(subtype)}/#{URI.encode(value)}.json"
       result = get_request(url)
 
       Characters.new(result.parsed_response)
@@ -114,10 +127,6 @@ module SC2Ranks
         raise NoKeyError if response['error'] == 'no_key'
         raise NoCharacterError if response['error'] == 'no_character' or response['error'] == 'no_characters'
         raise TooManyCharactersError if response['error'] == 'too_many_characters'
-      elsif response.response.is_a?(Net::HTTPBadRequest)
-        #sc2ranks doesn't follow their documentation right now.
-        #sending over 100 characters results in a HTTP 400 BadRequest error.
-        raise TooManyCharactersError
       end
     end
 

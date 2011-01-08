@@ -99,7 +99,6 @@ class TestSc2ranks < Test::Unit::TestCase
 
   context "A mass base request" do
     setup do
-      VCR.insert_cassette('mass_base_request', :record => :new_episodes)
       @api = SC2Ranks::API.new(API_KEY)
       #SC2Ranks::API.debug = true
 
@@ -114,12 +113,15 @@ class TestSc2ranks < Test::Unit::TestCase
     end
 
     should "return multiple characters at once" do
+      VCR.insert_cassette('mass_base_request', :record => :new_episodes)
       response = @api.get_mass_characters( @characters )
 
       assert_instance_of SC2Ranks::Characters, response
     end
 
     should "raise no NoCharacterError if no characters are requested" do
+      VCR.insert_cassette('mass_base_request_no_character', :record => :new_episodes)
+
       @characters << {:name => 'asdfghjkasdfghjk', :bnet_id => 123456789, :region => 'us'}
 
       assert_raises SC2Ranks::API::NoCharacterError do
@@ -128,6 +130,8 @@ class TestSc2ranks < Test::Unit::TestCase
     end
 
     should "raise TooManyCharactersError when more than 100 characters are provided" do
+      VCR.insert_cassette('mass_base_request_too_many_characters', :record => :new_episodes)
+
       too_many_chars = []
       (1..101).each do |i|
         too_many_chars << {:name => "user#{i}", :bnet_id => i, :region => 'us' }
@@ -201,6 +205,44 @@ class TestSc2ranks < Test::Unit::TestCase
       assert_raises SC2Ranks::API::NoCharacterError do
         @api.find('asdfghjkasdfghjkl')
       end
+    end
+  end
+
+  context "When performing a profile search" do
+    setup do
+      VCR.insert_cassette('profile_search',:record => :new_episodes)
+
+      @api = SC2Ranks::API.new(API_KEY)
+      @coderjoe = @api.get_team_info( 'coderjoe', 298901 )
+      @coderjoeteams = []
+      
+      @coderjoe.teams.each do |t|
+        @coderjoeteams[t['bracket']] = t
+      end
+    end
+
+    teardown do
+      VCR.eject_cassette
+    end
+
+    should "be able to search by division name" do
+      result = @api.profile_search( 'coderjoe', 'us', :division => @coderjoeteams[1]['division'].gsub(/division\s*/i,'') )
+      assert_instance_of SC2Ranks::Characters, result
+    end
+
+    should "be able to search by points" do
+      result = @api.profile_search( 'coderjoe', 'us',  :points => @coderjoeteams[1]['points'] )
+      assert_instance_of SC2Ranks::Characters, result
+    end
+
+    should "be able to search by wins" do
+      result = @api.profile_search( 'coderjoe', 'us', :wins => @coderjoeteams[1]['wins'] )
+      assert_instance_of SC2Ranks::Characters, result
+    end
+
+    should "be able to search by losses" do
+      result = @api.profile_search( 'coderjoe', 'us', :losses => @coderjoeteams[1]['losses'] )
+      assert_instance_of SC2Ranks::Characters, result
     end
   end
 end
