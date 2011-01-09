@@ -97,6 +97,41 @@ class TestSc2ranks < Test::Unit::TestCase
     end
   end
 
+  context "A mass base with team request" do
+    setup do
+      @api = SC2Ranks::API.new(API_KEY)
+      #SC2Ranks::API.debug = true
+
+      @characters = []
+      @characters << {:name => 'coderjoe', :bnet_id => 298901, :region=>'us'}
+      @characters << {:name => 'dayvie', :bnet_id => 715900,:region=>'us'}
+      @characters << {:name => 'HuK', :bnet_id => 388538,:region=>'us'}
+    end
+
+    teardown do
+      VCR.eject_cassette
+    end
+
+    should "return multiple characters at once" do
+      VCR.insert_cassette('mass_team_request', :record => :new_episodes)
+      response = @api.get_mass_teams( 1, false, @characters )
+
+      assert_instance_of SC2Ranks::Characters, response
+    end
+
+    should "return the correct teams for the given bracket" do
+      VCR.insert_cassette('mass_team_request_bracket', :record => :new_episodes)
+      response = @api.get_mass_teams( 2, true, @characters )
+
+      response.each do |c|
+        c.teams.each do |t|
+          assert_equals 2, t['bracket']
+          assert_equals 1, t['is_random']
+        end
+      end
+    end
+  end
+
   context "A mass base request" do
     setup do
       @api = SC2Ranks::API.new(API_KEY)
@@ -227,22 +262,28 @@ class TestSc2ranks < Test::Unit::TestCase
 
     should "be able to search by division name" do
       result = @api.profile_search( 'coderjoe', 'us', :division => @coderjoeteams[1]['division'].gsub(/division\s*/i,'') )
-      assert_instance_of SC2Ranks::Characters, result
+      assert_instance_of SC2Ranks::ProfileSearchResults, result
     end
 
     should "be able to search by points" do
       result = @api.profile_search( 'coderjoe', 'us',  :points => @coderjoeteams[1]['points'] )
-      assert_instance_of SC2Ranks::Characters, result
+      assert_instance_of SC2Ranks::ProfileSearchResults, result
     end
 
     should "be able to search by wins" do
       result = @api.profile_search( 'coderjoe', 'us', :wins => @coderjoeteams[1]['wins'] )
-      assert_instance_of SC2Ranks::Characters, result
+      assert_instance_of SC2Ranks::ProfileSearchResults, result
     end
 
     should "be able to search by losses" do
       result = @api.profile_search( 'coderjoe', 'us', :losses => @coderjoeteams[1]['losses'] )
-      assert_instance_of SC2Ranks::Characters, result
+      assert_instance_of SC2Ranks::ProfileSearchResults, result
+    end
+
+    should "include team info in results" do
+      result = @api.profile_search( 'coderjoe', 'us', :division => @coderjoeteams[1]['division'].gsub(/division\s*/i,'') )
+      assert_instance_of SC2Ranks::ProfileSearchResults, result
+      assert_equal @coderjoeteams[1]['division'], result[0].team['division_name']
     end
   end
 end
