@@ -97,6 +97,41 @@ class TestSc2ranks < Test::Unit::TestCase
     end
   end
 
+  context "A mass base with team request" do
+    setup do
+      @api = SC2Ranks::API.new(API_KEY)
+      #SC2Ranks::API.debug = true
+
+      @characters = []
+      @characters << {:name => 'coderjoe', :bnet_id => 298901, :region=>'us'}
+      @characters << {:name => 'dayvie', :bnet_id => 715900,:region=>'us'}
+      @characters << {:name => 'HuK', :bnet_id => 388538,:region=>'us'}
+    end
+
+    teardown do
+      VCR.eject_cassette
+    end
+
+    should "return multiple characters at once" do
+      VCR.insert_cassette('mass_team_request', :record => :new_episodes)
+      response = @api.get_mass_teams( 1, false, @characters )
+
+      assert_instance_of SC2Ranks::Characters, response
+    end
+
+    should "return the correct teams for the given bracket" do
+      VCR.insert_cassette('mass_team_request_bracket', :record => :new_episodes)
+      response = @api.get_mass_teams( 2, true, @characters )
+
+      response.each do |c|
+        c.teams.each do |t|
+          assert_equals 2, t['bracket']
+          assert_equals 1, t['is_random']
+        end
+      end
+    end
+  end
+
   context "A mass base request" do
     setup do
       @api = SC2Ranks::API.new(API_KEY)

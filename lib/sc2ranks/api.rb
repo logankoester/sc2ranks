@@ -61,7 +61,7 @@ module SC2Ranks
       #Using the standard rails format query string for an array 
       # characters[][region]=us&characters[][name]=coderjoe&characters[][bnet_id]=12345
       # causes sc2ranks.com to error 500. We should follow their docs and add array indexes.
-      #post_req = { :query => { :characters => character_array } }
+      #post_req = { :body => { :characters => character_array } }
       post_req = { :body => character_array_to_str_hash(character_array) }
 
       response = post_request(url, post_req )
@@ -69,6 +69,35 @@ module SC2Ranks
       Characters.new(response.parsed_response)
     end
 
+    # Return many sets of base character info with teamsin one lump request
+    # character_array should be an array of character hashes in the form of
+    # 
+    #   { :name => 'coderjoe', :bnet_id => '1234567', :region => 'us' }
+    #
+    # The name, bnet_id, and region are all required parameters.
+    # The bnet_id is required, you can not use character_code
+    # bracket is the bracket of team info you wish to retrieve
+    #   1 for 1v1 2 for 2v2 etc..
+    #   is_random is a boolean value representing if the bracket is the random bracket or not
+    def get_mass_teams( bracket, is_random, character_array )
+      url = "/mass/base/teams/"
+
+      is_random = is_random ? 1: 0
+
+      #Using the standard rails format query string for an array 
+      # characters[][region]=us&characters[][name]=coderjoe&characters[][bnet_id]=12345
+      # causes sc2ranks.com to error 500. We should follow their docs and add array indexes.
+      #post_req = { :body => { :characters => character_array } }
+      post_req = { :body => character_array_to_str_hash(character_array) }
+      post_req[:body]['team[bracket]'] = bracket
+      post_req[:body]['team[is_random]'] = is_random
+
+      response = post_request(url, post_req )
+
+      Characters.new(response.parsed_response)
+    end
+
+    
     # Search for a character by name and region
     # The response is a hash of character name and bnet_id
     # Further information should be fetched using get_character
