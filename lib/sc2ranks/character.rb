@@ -1,14 +1,14 @@
 module SC2Ranks
 
-  class Character < Struct.new(:name, :bnet_id, :character_code, :region, :updated_at, :achievement_points, :portrait, :teams)    
+  class Character < Struct.new(:name, :bnet_id, :character_code, :region, :updated_at, :achievement_points, :portrait, :teams)
     def initialize(hash)
       members.each do |member|
         self[member] = hash[member.to_s]
       end
     end
   end
- 
-  # Wraps array like responses from the API
+
+    # Wraps array like responses from the API
   #
   # If the total attribute doesn't match the array length
   # then there are more characters to be fetched if required
@@ -28,6 +28,30 @@ module SC2Ranks
         @total = arg['total']
       end
       super(@characters)
+    end
+  end
+
+  class ProfileSearchResult < Struct.new(:name, :bnet_id, :character_code, :region, :achievement_points, :team)
+    def initialize(hash)
+      members.each do |member|
+        self[member] = hash[member.to_s]
+      end
+    end
+  end
+ 
+  class ProfileSearchResults < DelegateClass(Array)
+    include Enumerable
+    attr_reader :results, :total
+    
+    def initialize(arg)
+      if arg.is_a?(Array)
+        @total = arg.length
+        @results = []
+        arg.each do |char|
+          @results << ProfileSearchResult.new(char)
+        end
+      end
+      super(@results)
     end
   end
 

@@ -120,7 +120,7 @@ module SC2Ranks
       url = "/psearch/#{region.to_s}/#{URI.encode(name)}/#{URI.encode(type)}/#{URI.encode(subtype)}/#{URI.encode(value)}.json"
       result = get_request(url)
 
-      Characters.new(result.parsed_response)
+      ProfileSearchResults.new(result.parsed_response)
     end
 
     def find(name, code = nil, region = REGIONS.first)

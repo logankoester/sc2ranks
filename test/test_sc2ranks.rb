@@ -262,22 +262,28 @@ class TestSc2ranks < Test::Unit::TestCase
 
     should "be able to search by division name" do
       result = @api.profile_search( 'coderjoe', 'us', :division => @coderjoeteams[1]['division'].gsub(/division\s*/i,'') )
-      assert_instance_of SC2Ranks::Characters, result
+      assert_instance_of SC2Ranks::ProfileSearchResults, result
     end
 
     should "be able to search by points" do
       result = @api.profile_search( 'coderjoe', 'us',  :points => @coderjoeteams[1]['points'] )
-      assert_instance_of SC2Ranks::Characters, result
+      assert_instance_of SC2Ranks::ProfileSearchResults, result
     end
 
     should "be able to search by wins" do
       result = @api.profile_search( 'coderjoe', 'us', :wins => @coderjoeteams[1]['wins'] )
-      assert_instance_of SC2Ranks::Characters, result
+      assert_instance_of SC2Ranks::ProfileSearchResults, result
     end
 
     should "be able to search by losses" do
       result = @api.profile_search( 'coderjoe', 'us', :losses => @coderjoeteams[1]['losses'] )
-      assert_instance_of SC2Ranks::Characters, result
+      assert_instance_of SC2Ranks::ProfileSearchResults, result
+    end
+
+    should "include team info in results" do
+      result = @api.profile_search( 'coderjoe', 'us', :division => @coderjoeteams[1]['division'].gsub(/division\s*/i,'') )
+      assert_instance_of SC2Ranks::ProfileSearchResults, result
+      assert_equal @coderjoeteams[1]['division'], result[0].team['division_name']
     end
   end
 end
